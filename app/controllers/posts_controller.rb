@@ -8,9 +8,12 @@ class PostsController < ApplicationController
       date =  obj.data.last_modified
       year = date.to_s[0...4]
       month = date.to_s[5...7]
-      posts << { title: title, slug: "#{year}/#{month}/#{obj.key.chomp(".txt")}" }
+      posts << { title: title, slug: "#{year}/#{month}/#{obj.key.chomp(".txt")}", date: date }
     end
-    render json: posts
+    sorted_by_date_posts = posts.sort do |a, b|
+      b[:date] <=> a[:date]
+    end
+    render json: sorted_by_date_posts
   end
 
   def show 
