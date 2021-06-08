@@ -10,7 +10,7 @@ class PostsController < ApplicationController
   def show
     url = @post.presigned_url(:get)
     body = URI.open(url).read
-    title =  @post.key.split("-").map { |word| word.capitalize }.join(" ").chomp(".txt")
+    title =  handle_title(@post)
     render json: { title: title, body: body, date: @post.data.last_modified }
   end
 
@@ -25,7 +25,7 @@ class PostsController < ApplicationController
   def sorted_by_date_posts
     posts = []
     BUCKET.objects.each do |obj|
-      title =  obj.key.split("-").map { |word| word.capitalize }.join(" ").chomp(".txt")
+      title =  handle_title(obj)
       date =  obj.data.last_modified
       year = date.to_s[0...4]
       month = date.to_s[5...7]
@@ -34,5 +34,13 @@ class PostsController < ApplicationController
     posts.sort do |a, b|
       b[:date] <=> a[:date]
     end
+  end
+
+  def handle_title(post) 
+    words = post.key.split("-")
+    if words[0][0] != "_"
+      words = words.map { |word| word.capitalize }
+    end
+    words.join(" ").chomp(".txt").tr("_", "")
   end
 end
